@@ -1,0 +1,289 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .wrap { padding: 1.5rem 0; max-width: 720px; }
+  .header h1 { font-size: 20px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+  .header p { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+  .top-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+  .field label { display: block; font-size: 11px; color: var(--color-text-secondary); margin-bottom: 6px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+  .field input[type="number"] { width: 100%; height: 40px; padding: 0 12px; font-size: 15px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); }
+  .toggle-row { display: flex; gap: 0; border: 1.5px solid #2563eb; border-radius: var(--border-radius-md); overflow: hidden; height: 40px; }
+  .tbtn { flex: 1; border: none; background: transparent; color: #2563eb; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; }
+  .tbtn.on { background: #2563eb; color: #ffffff; }
+  .tbtn:not(.on):hover { background: #eff6ff; }
+  .section-title { font-size: 10px; font-weight: 500; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.07em; margin: 1.25rem 0 8px; }
+  .disc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .disc-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); }
+  .disc-left { display: flex; align-items: center; gap: 8px; }
+  .disc-label { font-size: 12px; color: var(--color-text-secondary); }
+  .disc-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
+  .badge-obl { background: #fcebeb; color: #a32d2d; }
+  .badge-opt { background: #e6f1fb; color: #185fa5; }
+  .disc-pct { font-size: 11px; color: var(--color-text-tertiary); margin-right: 4px; }
+  .disc-chk { width: 15px; height: 15px; cursor: pointer; accent-color: #2563eb; }
+  .afp-sel { padding: 4px 6px; font-size: 11px; border: 0.5px solid var(--color-border-tertiary); border-radius: 6px; background: var(--color-background-primary); color: var(--color-text-secondary); }
+  .mini-in { height: 26px; font-size: 11px; padding: 0 4px; border: 0.5px solid var(--color-border-tertiary); border-radius: 5px; background: var(--color-background-primary); color: var(--color-text-secondary); width: 54px; }
+  .mini-lg { width: 66px; }
+  .result-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 1.5rem 0 1rem; }
+  .rcard { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 14px 16px; }
+  .rcard-lbl { font-size: 11px; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .rcard-val { font-size: 19px; font-weight: 500; color: var(--color-text-primary); }
+  .rcard-val.green { color: #0f6e56; }
+  .rcard-val.red { color: #a32d2d; }
+  .bar-wrap { height: 6px; background: var(--color-border-tertiary); border-radius: 3px; margin: 0 0 10px; overflow: hidden; display: flex; }
+  .bar-seg { height: 100%; transition: width 0.3s; }
+  .bar-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--color-text-secondary); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .breakdown { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+  .brow { display: flex; justify-content: space-between; align-items: center; padding: 9px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+  .brow:last-child { border-bottom: none; }
+  .brow.sub, .brow.tot { background: var(--color-background-secondary); }
+  .brow.tot { font-weight: 500; }
+  .brow-name { color: var(--color-text-secondary); }
+  .brow.sub .brow-name, .brow.tot .brow-name { color: var(--color-text-primary); }
+  .brow-amt { color: var(--color-text-primary); font-variant-numeric: tabular-nums; }
+  .brow-pct { font-size: 11px; color: var(--color-text-tertiary); margin-left: 6px; }
+  .note { font-size: 11px; color: var(--color-text-tertiary); margin-top: 10px; line-height: 1.6; }
+  @media (max-width: 520px) {
+    .top-row, .disc-grid { grid-template-columns: 1fr; }
+    .result-cards { grid-template-columns: 1fr 1fr; }
+    .result-cards .rcard:last-child { grid-column: span 2; }
+  }
+</style>
+
+<div class="wrap">
+  <div class="header">
+    <h1>Calculadora de sueldo líquido — Chile</h1>
+    <p>Ingresa tu sueldo bruto y elige los descuentos que aplican</p>
+  </div>
+
+  <div class="top-row">
+    <div class="field">
+      <label id="lbl_sal">Sueldo bruto mensual (CLP)</label>
+      <input type="number" id="salario" value="1000000" min="0" step="10000" oninput="calc()" />
+    </div>
+    <div class="field">
+      <label>Período del ingreso</label>
+      <div class="toggle-row">
+        <button class="tbtn on" id="btnMes" onclick="setPeriodo('mensual')">Mensual</button>
+        <button class="tbtn" id="btnAnual" onclick="setPeriodo('anual')">Anual</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Descuentos previsionales — obligatorios</div>
+  <div class="disc-grid">
+    <div class="disc-item">
+      <div class="disc-left"><input type="checkbox" class="disc-chk" checked disabled /><span class="disc-label">AFP</span></div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <select class="afp-sel" id="afp_sel" onchange="calc()">
+          <option value="10.58">Capital (10.58%)</option>
+          <option value="10.65">Cuprum (10.65%)</option>
+          <option value="10.49" selected>Habitat (10.49%)</option>
+          <option value="10.65">Planvital (10.65%)</option>
+          <option value="10.65">ProVida (10.65%)</option>
+          <option value="10.58">Modelo (10.58%)</option>
+          <option value="10.49">Uno (10.49%)</option>
+        </select>
+        <span class="badge-obl disc-badge">Obl.</span>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-left"><input type="checkbox" class="disc-chk" checked disabled /><span class="disc-label">SIS (1.49%)</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><span class="disc-pct">1.49%</span><span class="badge-obl disc-badge">Obl.</span></div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-left"><input type="checkbox" class="disc-chk" checked disabled /><span class="disc-label">Salud FONASA (7%)</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><span class="disc-pct">7.00%</span><span class="badge-obl disc-badge">Obl.</span></div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-left"><input type="checkbox" class="disc-chk" checked disabled /><span class="disc-label">Cesantía trabajador</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><span class="disc-pct">0.60%</span><span class="badge-obl disc-badge">Obl.</span></div>
+    </div>
+  </div>
+
+  <div class="section-title">Impuesto a la renta</div>
+  <div class="disc-grid">
+    <div class="disc-item" style="grid-column:span 2">
+      <div class="disc-left"><input type="checkbox" class="disc-chk" checked disabled /><span class="disc-label">Impuesto único 2ª categoría — tabla escalonada SII (mensual)</span></div>
+      <span class="badge-obl disc-badge">Obl.</span>
+    </div>
+  </div>
+
+  <div class="section-title">Descuentos opcionales / voluntarios</div>
+  <div class="disc-grid">
+    <div class="disc-item">
+      <div class="disc-left"><input type="checkbox" class="disc-chk" id="chk_isapre" onchange="calc()" /><span class="disc-label">Isapre (diferencial sobre 7%)</span></div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <input class="mini-in" type="number" id="isapre_uf" value="1.5" min="0" step="0.1" oninput="calc()" />
+        <span class="disc-pct" style="font-size:10px">UF/mes</span><span class="badge-opt disc-badge">Opt.</span>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-left"><input type="checkbox" class="disc-chk" id="chk_apv" onchange="calc()" /><span class="disc-label">APV voluntario</span></div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <input class="mini-in" type="number" id="apv_pct" value="2" min="0" max="50" step="0.5" oninput="calc()" />
+        <span class="disc-pct">%</span><span class="badge-opt disc-badge">Opt.</span>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-left"><input type="checkbox" class="disc-chk" id="chk_caja" onchange="calc()" /><span class="disc-label">Caja de compensación</span></div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <input class="mini-in" type="number" id="caja_pct" value="0.6" min="0" max="5" step="0.1" oninput="calc()" />
+        <span class="disc-pct">%</span><span class="badge-opt disc-badge">Opt.</span>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-left"><input type="checkbox" class="disc-chk" id="chk_sind" onchange="calc()" /><span class="disc-label">Cuota sindical</span></div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <input class="mini-in mini-lg" type="number" id="sind_amt" value="5000" min="0" step="1000" oninput="calc()" />
+        <span class="disc-pct" style="font-size:10px">CLP</span><span class="badge-opt disc-badge">Opt.</span>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-left"><input type="checkbox" class="disc-chk" id="chk_cred" onchange="calc()" /><span class="disc-label">Crédito social / banco</span></div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <input class="mini-in mini-lg" type="number" id="cred_amt" value="50000" min="0" step="5000" oninput="calc()" />
+        <span class="disc-pct" style="font-size:10px">CLP</span><span class="badge-opt disc-badge">Opt.</span>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-left"><input type="checkbox" class="disc-chk" id="chk_otros" onchange="calc()" /><span class="disc-label">Otros descuentos</span></div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <input class="mini-in mini-lg" type="number" id="otros_amt" value="0" min="0" step="1000" oninput="calc()" />
+        <span class="disc-pct" style="font-size:10px">CLP</span><span class="badge-opt disc-badge">Opt.</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="results"></div>
+  <div class="note" id="foot"></div>
+</div>
+
+<script>
+const UF = 38500;
+let periodo = 'mensual';
+
+function setPeriodo(p) {
+  periodo = p;
+  document.getElementById('btnMes').classList.toggle('on', p === 'mensual');
+  document.getElementById('btnAnual').classList.toggle('on', p === 'anual');
+  document.getElementById('lbl_sal').textContent =
+    p === 'mensual' ? 'Sueldo bruto mensual (CLP)' : 'Sueldo bruto anual (CLP)';
+  calc();
+}
+
+function fmt(n) { return '$' + Math.round(n).toLocaleString('es-CL'); }
+function fmtP(n) { return n.toFixed(1) + '%'; }
+
+function impuesto(ri) {
+  const utm = 66362;
+  const T = [
+    [0,    13.5, 0     ],
+    [13.5, 30,   0.04  ],
+    [30,   50,   0.08  ],
+    [50,   70,   0.135 ],
+    [70,   90,   0.23  ],
+    [90,   120,  0.304 ],
+    [120,  150,  0.355 ],
+    [150,  1e9,  0.40  ],
+  ];
+  let tax = 0;
+  for (const [lo, hi, tasa] of T) {
+    const loClp = lo * utm;
+    const hiClp = hi * utm;
+    if (ri <= loClp) break;
+    tax += (Math.min(ri, hiClp) - loClp) * tasa;
+    if (ri <= hiClp) break;
+  }
+  return Math.max(0, tax);
+}
+
+function calc() {
+  const raw = parseFloat(document.getElementById('salario').value) || 0;
+  const bruto = periodo === 'anual' ? raw / 12 : raw;
+
+  const afpPct = parseFloat(document.getElementById('afp_sel').value) / 100;
+  const afp  = bruto * afpPct;
+  const sis  = bruto * 0.0149;
+  const sal  = bruto * 0.07;
+  const ces  = bruto * 0.006;
+
+  const useIsapre = document.getElementById('chk_isapre').checked;
+  const isapre = useIsapre ? Math.max(0, parseFloat(document.getElementById('isapre_uf').value) * UF - sal) : 0;
+
+  const useApv = document.getElementById('chk_apv').checked;
+  const apv = useApv ? bruto * (parseFloat(document.getElementById('apv_pct').value) || 0) / 100 : 0;
+
+  const useCaja = document.getElementById('chk_caja').checked;
+  const caja = useCaja ? bruto * (parseFloat(document.getElementById('caja_pct').value) || 0) / 100 : 0;
+
+  const useSind = document.getElementById('chk_sind').checked;
+  const sind = useSind ? parseFloat(document.getElementById('sind_amt').value) || 0 : 0;
+
+  const useCred = document.getElementById('chk_cred').checked;
+  const cred = useCred ? parseFloat(document.getElementById('cred_amt').value) || 0 : 0;
+
+  const useOtros = document.getElementById('chk_otros').checked;
+  const otros = useOtros ? parseFloat(document.getElementById('otros_amt').value) || 0 : 0;
+
+  const ri  = Math.max(0, bruto - afp - sis - sal - ces - apv);
+  const imp = impuesto(ri);
+
+  const totalDesc = afp + sis + sal + ces + isapre + apv + imp + caja + sind + cred + otros;
+  const liquido   = bruto - totalDesc;
+  const mult = periodo === 'anual' ? 12 : 1;
+  const M = v => v * mult;
+  const P = v => bruto > 0 ? fmtP(v / bruto * 100) : '0.0%';
+
+  const pLiq = bruto > 0 ? Math.max(0, liquido / bruto * 100) : 0;
+  const pAfp = bruto > 0 ? afp / bruto * 100 : 0;
+  const pSal = bruto > 0 ? (sal + isapre) / bruto * 100 : 0;
+  const pImp = bruto > 0 ? imp / bruto * 100 : 0;
+  const pOt  = Math.max(0, 100 - pLiq - pAfp - pSal - pImp);
+  const per  = periodo === 'anual' ? 'año' : 'mes';
+
+  let rows = `
+    <div class="brow sub"><span class="brow-name">Sueldo bruto / ${per}</span><span class="brow-amt">${fmt(M(bruto))}</span></div>
+    <div class="brow"><span class="brow-name">AFP (${(afpPct*100).toFixed(2)}%)</span><span class="brow-amt" style="color:#a32d2d">− ${fmt(M(afp))}<span class="brow-pct">${P(afp)}</span></span></div>
+    <div class="brow"><span class="brow-name">SIS — seg. invalidez (1.49%)</span><span class="brow-amt" style="color:#a32d2d">− ${fmt(M(sis))}<span class="brow-pct">${P(sis)}</span></span></div>
+    <div class="brow"><span class="brow-name">Salud${useIsapre?' + Isapre':' FONASA (7%)'}</span><span class="brow-amt" style="color:#a32d2d">− ${fmt(M(sal+isapre))}<span class="brow-pct">${P(sal+isapre)}</span></span></div>
+    <div class="brow"><span class="brow-name">Seg. cesantía trabajador (0.6%)</span><span class="brow-amt" style="color:#a32d2d">− ${fmt(M(ces))}<span class="brow-pct">${P(ces)}</span></span></div>`;
+  if (apv > 0) rows += `<div class="brow"><span class="brow-name">APV voluntario</span><span class="brow-amt" style="color:#185fa5">− ${fmt(M(apv))}<span class="brow-pct">${P(apv)}</span></span></div>`;
+  rows += `<div class="brow sub"><span class="brow-name">Renta imponible mensual</span><span class="brow-amt">${fmt(ri)}</span></div>
+    <div class="brow"><span class="brow-name">Impuesto 2ª cat. (tasa efectiva ${bruto>0?fmtP(imp/bruto*100):'0%'})</span><span class="brow-amt" style="color:#a32d2d">− ${fmt(M(imp))}<span class="brow-pct">${P(imp)}</span></span></div>`;
+  if (caja  > 0) rows += `<div class="brow"><span class="brow-name">Caja de compensación</span><span class="brow-amt" style="color:#185fa5">− ${fmt(M(caja))}</span></div>`;
+  if (sind  > 0) rows += `<div class="brow"><span class="brow-name">Cuota sindical</span><span class="brow-amt" style="color:#185fa5">− ${fmt(M(sind))}</span></div>`;
+  if (cred  > 0) rows += `<div class="brow"><span class="brow-name">Crédito social / banco</span><span class="brow-amt" style="color:#185fa5">− ${fmt(M(cred))}</span></div>`;
+  if (otros > 0) rows += `<div class="brow"><span class="brow-name">Otros descuentos</span><span class="brow-amt" style="color:#185fa5">− ${fmt(M(otros))}</span></div>`;
+  rows += `<div class="brow tot"><span class="brow-name">Sueldo líquido / ${per}</span><span class="brow-amt" style="color:#0f6e56;font-size:15px">${fmt(M(liquido))}</span></div>`;
+
+  document.getElementById('results').innerHTML = `
+    <div class="result-cards">
+      <div class="rcard"><div class="rcard-lbl">Sueldo bruto</div><div class="rcard-val">${fmt(M(bruto))}</div></div>
+      <div class="rcard"><div class="rcard-lbl">Total descuentos</div><div class="rcard-val red">− ${fmt(M(totalDesc))}</div></div>
+      <div class="rcard"><div class="rcard-lbl">Sueldo líquido</div><div class="rcard-val green">${fmt(M(liquido))}</div></div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-seg" style="width:${pLiq.toFixed(1)}%;background:#1d9e75"></div>
+      <div class="bar-seg" style="width:${pAfp.toFixed(1)}%;background:#3c3489"></div>
+      <div class="bar-seg" style="width:${pSal.toFixed(1)}%;background:#0c447c"></div>
+      <div class="bar-seg" style="width:${pImp.toFixed(1)}%;background:#e24b4a"></div>
+      <div class="bar-seg" style="width:${pOt.toFixed(1)}%;background:#888780"></div>
+    </div>
+    <div class="bar-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#1d9e75"></div>Líquido ${fmtP(pLiq)}</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3c3489"></div>AFP ${fmtP(pAfp)}</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#0c447c"></div>Salud ${fmtP(pSal)}</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e24b4a"></div>Impuesto ${fmtP(pImp)}</div>
+      ${pOt > 0.2 ? `<div class="legend-item"><div class="legend-dot" style="background:#888780"></div>Otros ${fmtP(pOt)}</div>` : ''}
+    </div>
+    <div class="breakdown">${rows}</div>`;
+
+  document.getElementById('foot').textContent =
+    `El impuesto se calcula siempre sobre la renta imponible mensual. En modo anual el input se divide entre 12 y los resultados se muestran × 12. UTM ref.: $${(66362).toLocaleString('es-CL')} · UF ref.: $${UF.toLocaleString('es-CL')}. Tasas AFP 2024–2025. Solo trabajadores dependientes.`;
+}
+
+calc();
+</script>
